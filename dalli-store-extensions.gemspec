@@ -6,7 +6,6 @@ spec = Gem::Specification.new do |s|
   s.files = Dir['lib/**/*.rb'] + Dir['spec/**/*.rb']
   s.require_path = 'lib'
   s.autorequire = 'builder'
-  s.has_rdoc = false
   s.extra_rdoc_files = Dir['[A-Z]*']
   s.rdoc_options << '--title' <<  'dalli-store-extensions -- matched deletion'
   s.author = "James Kassemi"
