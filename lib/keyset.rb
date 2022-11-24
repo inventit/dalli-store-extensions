@@ -5,39 +5,41 @@ class KeySet < Set
     @store = store
     @store_key = store_key
 
-
-    if existing=@store.send(:read_entry, @store_key, {})
+    if existing = @store.send(:read_entry, @store_key, {})
       super(YAML.load(existing.to_s))
     else
       super([])
     end
-
   end
 
-  def add_with_cache(value)
-    add_without_cache(value)
-  ensure
-    store
-  end
+  alias add_without_cache add
+  alias delete_without_cache delete
+  alias clear_without_cache clear
 
-  alias_method_chain :add, :cache
+  prepend(
+    Module.new do
+      def add(value)
+        super(value)
+      ensure
+        store
+      end
 
-  def delete_with_cache(value)
-    delete_without_cache(value)
-  ensure
-    store
-  end
+      def delete(value)
+        super(value)
+      ensure
+        store
+      end
 
-  alias_method_chain :delete, :cache
+      def clear
+        super
+      ensure
+        store
+      end
+    end
+  )
 
-  def clear_with_cache
-    clear_without_cache
-  ensure
-    store
-  end
-
-  alias_method_chain :clear, :cache
   private
+
   def store
     @store.send(:write_entry_without_match_support, @store_key, self.to_a.to_yaml, {})
   end
