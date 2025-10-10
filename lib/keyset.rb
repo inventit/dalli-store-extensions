@@ -1,12 +1,10 @@
-require 'active_support/core_ext/module/aliasing'
-
 class KeySet < Set
   def initialize(store, store_key)
     @store = store
     @store_key = store_key
 
     if existing = @store.send(:read_entry, @store_key, {})
-      super(YAML.load(existing.to_s))
+      super(existing.value)
     else
       super([])
     end
@@ -35,12 +33,20 @@ class KeySet < Set
       ensure
         store
       end
+
+      def marshal_dump
+        @hash
+      end
+
+      def marshal_load(obj)
+        @hash = obj
+      end
     end
   )
 
   private
 
   def store
-    @store.send(:write_entry_without_match_support, @store_key, self.to_a.to_yaml, {})
+    @store.send(:write_entry_without_match_support, @store_key, ActiveSupport::Cache::Entry.new(self), {})
   end
 end
